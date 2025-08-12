@@ -1,7 +1,7 @@
 package com.heladeria.heladeria.controller;
 
 import com.heladeria.heladeria.model.Expense;
-import com.heladeria.heladeria.service.ExpenseServiceImp;
+import com.heladeria.heladeria.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,11 +16,11 @@ import java.util.List;
 public class ExpenseController {
 
     @Autowired
-    private ExpenseServiceImp expenseServiceImp;
+    private ExpenseService expenseService;
 
     @GetMapping("/expenses")
     public List<Expense> obtenerExpenses(){
-        var expenses = expenseServiceImp.listarExpenses();
+        var expenses = expenseService.listarExpenses();
         return expenses;
     }
 }
