@@ -1,10 +1,12 @@
 package com.heladeria.heladeria.service;
 
+import com.heladeria.heladeria.model.Cylinder;
 import com.heladeria.heladeria.model.Expense;
 import com.heladeria.heladeria.repository.ExpenseRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ExpenseServiceImp implements ExpenseService{
@@ -31,7 +33,12 @@ public class ExpenseServiceImp implements ExpenseService{
     }
 
     @Override
-    public void eliminarExpense(Long idExpense) {
-        expenseRepository.deleteById(idExpense);
+    public boolean eliminarExpense(Long id) {
+        Optional<Expense> expense = expenseRepository.findById(id);
+        if(expense.isPresent()){
+            expenseRepository.delete(expense.get());
+            return true;
+        }
+        return false;
     }
 }

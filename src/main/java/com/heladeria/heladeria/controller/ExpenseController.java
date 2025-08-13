@@ -3,10 +3,8 @@ package com.heladeria.heladeria.controller;
 import com.heladeria.heladeria.model.Expense;
 import com.heladeria.heladeria.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,4 +21,27 @@ public class ExpenseController {
         var expenses = expenseService.listarExpenses();
         return expenses;
     }
+
+    @GetMapping("expenses/{id}")
+    public ResponseEntity<Expense> obtenerExpenseById(@PathVariable Long id){
+        Expense expense = expenseService.obtenerExpensePorId(id);
+        return ResponseEntity.ok(expense);
+    }
+
+    @PostMapping("expenses")
+    public Expense guardarExpense(@RequestBody Expense expense){
+        return expenseService.guardarExpense(expense);
+    }
+
+    @DeleteMapping("expenses/{id}")
+    public ResponseEntity<Void> deleteExpense(@PathVariable Long id){
+        boolean eliminado = expenseService.eliminarExpense(id);
+        if (eliminado) {
+            return ResponseEntity.noContent().build(); // 204 si se borró
+        } else {
+            return ResponseEntity.notFound().build(); // 404 si no existe
+        }
+    }
+
+
 }

@@ -8,5 +8,5 @@ public interface ExpenseService {
     public List<Expense> listarExpenses();
     public Expense obtenerExpensePorId(Long idExpense);
     public Expense guardarExpense(Expense expense);
-    public void eliminarExpense(Long idExpense);
+    public boolean eliminarExpense(Long idExpense);
 }

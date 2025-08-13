@@ -37,7 +37,7 @@ public class CylinderController {
     }
 
     @DeleteMapping("cylinder/{id}")
-    public ResponseEntity<Cylinder> deleteCylinderById(@PathVariable Long id){
+    public ResponseEntity<Void> deleteCylinderById(@PathVariable Long id){
         boolean eliminado = cylinderService.eliminarCylinder(id);
         if(!eliminado){
             return ResponseEntity.notFound().build();
