@@ -12,7 +12,7 @@ public interface SaleService {
 
     public Sale guardarSale(Sale sale);
 
-    public void eliminarSale(Sale sale);
+    public boolean eliminarSale(Long id);
 
     // Lógica de negocio extra
     Sale crearVenta(Sale sale); // procesa venta con ítems y totales

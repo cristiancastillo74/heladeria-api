@@ -1,21 +1,28 @@
 package com.heladeria.heladeria.service;
 
 import com.heladeria.heladeria.model.Sale;
+import com.heladeria.heladeria.model.SaleItem;
 import com.heladeria.heladeria.repository.SaleRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SaleServiceImp implements SaleService{
 
-    private final SaleRepository saleRepository;
+    @Autowired
+    private  SaleRepository saleRepository;
 
-    public SaleServiceImp(SaleRepository saleRepository) {
-        this.saleRepository = saleRepository;
-    }
+    @Autowired
+    private CylinderConsumptionService cylinderConsumptionService;
+
+    @Autowired
+    private ProductService productService;
 
     @Override
     public List<Sale> listarSale() {
@@ -35,13 +42,34 @@ public class SaleServiceImp implements SaleService{
 
     @Override
     @Transactional
-    public void eliminarSale(Sale sale) {
-        saleRepository.delete(sale);
+    public boolean eliminarSale(Long id) {
+        Optional<Sale> sale = saleRepository.findById(id);
+        if (sale.isPresent()){
+            saleRepository.delete(sale.get());
+            return true;
+        }
+        return false;
     }
 
     @Override
     @Transactional
     public Sale crearVenta(Sale sale) {
+
+        BigDecimal total = BigDecimal.ZERO;
+        for(SaleItem item : sale.getItems()){
+            BigDecimal subTotal = item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            total = total.add(subTotal);
+
+            //actualizar stock
+            productService.disminuirStock(item.getProduct().getId(), item.getQuantity());
+
+            // 3️⃣ Registrar consumo de cilindros
+            cylinderConsumptionService.registrarConsumo(item.getProduct().getId(), item.getQuantity());
+        }
+        sale.setTotalAmount(total);
+        sale.setDayClosed(false);
+
+        return saleRepository.save(sale)
 
         sale.setDayClosed(false);
         return saleRepository.save(sale);
