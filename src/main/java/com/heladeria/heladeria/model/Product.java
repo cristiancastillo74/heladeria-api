@@ -25,6 +25,8 @@ public class Product {
     private String category;
     private BigDecimal price;
     private Integer stock;
+    private Boolean isIceCream = false;
+    private Integer BallsPerUnit = 0;
 
 
     @CreatedDate

@@ -9,4 +9,5 @@ public interface CylinderConsumptionService {
     public CylinderConsumption saveCylinderConsumption(CylinderConsumption cylinderConsumption);
     public CylinderConsumption searchCylinderConsumptionById(Long id);
     public boolean deleteCylinderConsumption(Long id);
+    public void registrarConsumo(Long userId, Long brachId, int quantity);
 }

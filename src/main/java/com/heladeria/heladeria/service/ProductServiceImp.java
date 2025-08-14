@@ -2,6 +2,7 @@ package com.heladeria.heladeria.service;
 
 import com.heladeria.heladeria.model.Product;
 import com.heladeria.heladeria.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,5 +37,17 @@ public class ProductServiceImp implements ProductService{
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional
+    public void disminuirStock(Long id, int quantity) {
+        Product product = productRepository
+                .findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        if(product.getStock() < quantity){
+            throw new RuntimeException("Stock insufficient");
+        }
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
     }
 }

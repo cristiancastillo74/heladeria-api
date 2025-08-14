@@ -1,10 +1,12 @@
 package com.heladeria.heladeria.service;
 
-import com.heladeria.heladeria.model.CylinderConsumption;
-import com.heladeria.heladeria.repository.CylinderConsumptionRepository;
+import com.heladeria.heladeria.model.*;
+import com.heladeria.heladeria.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +15,17 @@ public class CylinderConsumptionServiceImp implements CylinderConsumptionService
 
     @Autowired
     private CylinderConsumptionRepository cylinderConsumptionRepository;
+    @Autowired
+    private CylinderRepository cylinderRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BranchRepository branchRepository;
+
+    //( promedio = 200 per cylinder)
+    private static final int BOLAS_POR_CILINDRO = 200;
 
     @Override
     public List<CylinderConsumption> getCylinderConsumption() {
@@ -38,5 +51,32 @@ public class CylinderConsumptionServiceImp implements CylinderConsumptionService
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional
+    public void registrarConsumo(Long userId, Long branchId, int totalBolas) {
+        // Obtener usuario
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Obtener sucursal
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new RuntimeException("branch not found"));
+
+        // Obtener cilindro activo (primero disponible)
+        Cylinder cylinder = cylinderRepository.findFirstByOrderByIdAsc()
+                .orElseThrow(() -> new RuntimeException("cylinders not availables"));
+
+        //convierte bolas a fraccion
+        double consumptionCylinder = (double) totalBolas / BOLAS_POR_CILINDRO;
+        CylinderConsumption consumo = new CylinderConsumption();
+        consumo.setCylinder(cylinder);
+        consumo.setUser(user);
+        consumo.setBranch(branch);
+        consumo.setBallsConsumed(totalBolas);
+        //consumo.setQuantity(consumptionCylinder);
+
+        cylinderConsumptionRepository.save(consumo);
     }
 }

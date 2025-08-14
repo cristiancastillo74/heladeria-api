@@ -15,20 +15,28 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Cylinder {
+public class CylinderInventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String flavor;  // Sabor del cilindro
+    @ManyToOne
+    @JoinColumn(name = "cylinder_id")
+    private Cylinder cylinder;
 
-    private Double estimatedBalls;  // Estimación de bolas restantes
+    @ManyToOne
+    @JoinColumn(name = "branch_id")
+    private Branch branch;  // Sucursal donde se consumió
+
+    private Double fraction;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @CreatedDate
     private LocalDateTime createdAt;
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
 }

@@ -19,15 +19,6 @@ public class CylinderConsumption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer ballsConsumed;  // Cantidad de bolas consumidas en este registro
-
-    @CreatedDate
-    private LocalDateTime createdAt;
-
-    @ManyToOne
-    @JoinColumn(name = "cylinder_id")
-    private Cylinder cylinder;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;  // Usuario que registró el consumo
@@ -35,5 +26,17 @@ public class CylinderConsumption {
     @ManyToOne
     @JoinColumn(name = "branch_id")
     private Branch branch;  // Sucursal donde se consumió
+
+    @ManyToOne
+    @JoinColumn(name = "cylinder_id")
+    private Cylinder cylinder;
+
+
+    private Integer ballsConsumed;  // Cantidad de bolas consumidas en este registro
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+
 
 }
