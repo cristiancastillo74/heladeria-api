@@ -1,10 +1,7 @@
 package com.heladeria.heladeria.service;
 
 import com.heladeria.heladeria.model.*;
-import com.heladeria.heladeria.repository.BranchRepository;
-import com.heladeria.heladeria.repository.ProductRepository;
-import com.heladeria.heladeria.repository.SaleRepository;
-import com.heladeria.heladeria.repository.UserRepository;
+import com.heladeria.heladeria.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +27,10 @@ public class SaleServiceImp implements SaleService{
     private BranchRepository branchRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private CylinderInventoryRepository cylinderInventoryRepository;
+    @Autowired
+    private CylinderRepository cylinderRepository;
 
     @Override
     public List<Sale> listarSale() {
@@ -105,8 +106,44 @@ public class SaleServiceImp implements SaleService{
 
             // 3️⃣ Registrar consumo de cilindros solo si es helado
             if(product.getIsIceCream() && product.getBallsPerUnit() > 0){
-                int totalBolas = product.getBallsPerUnit() * item.getQuantity();
-                cylinderConsumptionService.registrarConsumo(userId, branchId, totalBolas);
+
+                Cylinder cylinder = product.getCylinder();
+
+                Optional<CylinderInventory> optionalCylinder = cylinderInventoryRepository.findByBranchIdAndCylinderIdAndStatusOrderByCreatedAtAsc(
+                        branch.getId(),
+                        cylinder.getId(),
+                        Status.CYLINDER_EN_USO
+                );
+
+                CylinderInventory cylinderInventory;
+                if(optionalCylinder.isPresent()){
+                    cylinderInventory = optionalCylinder.get();
+                } else {
+                    // 2️⃣ No hay en uso -> buscar uno lleno
+                    cylinderInventory = cylinderInventoryRepository
+                            .findByBranchIdAndCylinderIdAndStatusOrderByCreatedAtAsc(
+                                    branch.getId(),
+                                    product.getCylinder().getId(),
+                                    Status.CYLINDER_LLENO
+                            )
+                            .orElseThrow(() -> new RuntimeException("No Cylinder available"));
+
+                    // Cambiar su status a EN_USO
+                    cylinderInventory.setStatus(Status.CYLINDER_EN_USO);
+                }
+
+                // Calcular fracción a restar
+                int bolasConsumidas = item.getQuantity() * product.getBallsPerUnit();
+                double fraccionConsumida = (double)bolasConsumidas / (double)product.getCylinder().getEstimatedBalls();
+                double nuevaFraccion = cylinderInventory.getFraction() - fraccionConsumida;
+
+                cylinderInventory.setFraction(Math.max(0, nuevaFraccion));
+
+                if (nuevaFraccion <= 0) {
+                    cylinderInventory.setStatus(Status.CYLINDER_VACIO);
+                }
+
+                cylinderInventoryRepository.save(cylinderInventory);
 
             }
         }

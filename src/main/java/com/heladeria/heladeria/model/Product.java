@@ -28,6 +28,10 @@ public class Product {
     private Boolean isIceCream = false;
     private Integer BallsPerUnit = 0;
 
+    @ManyToOne
+    @JoinColumn(name = "cylinder_id")
+    private Cylinder cylinder;
+
 
     @CreatedDate
     private LocalDateTime createdAt;
