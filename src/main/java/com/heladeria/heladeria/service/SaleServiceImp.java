@@ -81,88 +81,83 @@ public class SaleServiceImp implements SaleService{
 
         BigDecimal total = BigDecimal.ZERO;
 
-        // Primero validar stock de todos los items antes de modificar nada
+        // Validar stock de productos normales antes de procesar
         for (SaleItem item : sale.getItems()) {
-            Optional<ProductInventory> productInventoryOpt  = productInventoryRepository.findById(item.getProduct().getId());
+            Optional<ProductInventory> productInventoryOpt = productInventoryRepository.findById(item.getProduct().getId());
             if (productInventoryOpt.isPresent()) {
                 ProductInventory productInventory = productInventoryOpt.get();
-                if (productInventory.getProduct().getIsIceCream() == false) {
+                if (!productInventory.getProduct().getIsIceCream()) {
                     if (productInventory.getStock() < item.getQuantity()) {
-                        throw new RuntimeException("Stock insufficient for product: " + productInventory.getProduct().getName());
+                        throw new RuntimeException("Stock insuficiente para producto: " + productInventory.getProduct().getName());
                     }
                 }
             }
         }
 
-        for(SaleItem item : sale.getItems()){
-            Optional<ProductInventory> productInventoryOpt  = productInventoryRepository.findById(item.getProduct().getId());
+        // Procesar items
+        for (SaleItem item : sale.getItems()) {
+            Product product = item.getProduct();
+            BigDecimal price;
+
+            Optional<ProductInventory> productInventoryOpt = productInventoryRepository.findById(product.getId());
             if (productInventoryOpt.isPresent()) {
-                ProductInventory productInventory = productInventoryOpt.get();
+                // Caso 1: Producto normal
+                ProductInventory pi = productInventoryOpt.get();
+                price = pi.getProduct().getPrice();
+
+                // Actualizar stock
+                if (!pi.getProduct().getIsIceCream()) {
+                    productInventoryService.disminuirStock(product.getId(), item.getQuantity());
                 }
 
-                item.setPrice(productInventory.getProduct().getPrice()); // toma automáticamente el precio del producto
-                item.setSale(sale);
-                BigDecimal subTotal = item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-                total = total.add(subTotal);
+            } else {
+                // Caso 2: Cilindro (helado)
+                CylinderInventory ci = cylinderInventoryRepository.findByProduct(product)
+                        .orElseThrow(() -> new RuntimeException("Inventario de cilindro no encontrado para producto " + product.getName()));
+                price = ci.getProduct().getPrice();
 
-                //actualizar stock
-                if(!productInventory.getProduct().getIsIceCream()){
-                    productInventoryService.disminuirStock(item.getProduct().getId(), item.getQuantity());
-                    }
+                if (ci.getProduct().getIsIceCream() && ci.getProduct().getBallsPerUnit() > 0) {
+                    Optional<CylinderInventory> optionalCylinder = cylinderInventoryRepository.findFirstByProductAndBranchAndStatusOrderByCreatedAtAsc(
+                            ci.getProduct(),
+                            branch,
+                            Status.CYLINDER_EN_USO
+                    );
 
-
-            // 3️⃣ Registrar consumo de cilindros solo si es helado
-            if(productInventory.getProduct().getIsIceCream() && productInventory.getProduct().getBallsPerUnit() > 0) {
-
-
-                Optional<CylinderInventory> optionalCylinder = cylinderInventoryRepository.findFirstByProductAndBranchAndStatusOrderByCreatedAtAsc(
-                        productInventory.getProduct(),
-                        branch,
-                        Status.CYLINDER_EN_USO
-                );
-
-
-                if (optionalCylinder.isEmpty()) {
-                    throw new RuntimeException("No hay cilindros activos para este producto en la sucursal " + branch.getName());
-                }
-
-                CylinderInventory cylinderInventory;
-                if (optionalCylinder.isPresent()) {
-                    cylinderInventory = optionalCylinder.get();
-                } else {
-                    // 2️⃣ No hay en uso -> buscar uno lleno
-                    cylinderInventory = cylinderInventoryRepository
-                            .findFirstByProductAndBranchAndStatusOrderByCreatedAtAsc(
-                                    productInventory.getProduct(),
+                    CylinderInventory cylinderInventory = optionalCylinder.orElseGet(() ->
+                            cylinderInventoryRepository.findFirstByProductAndBranchAndStatusOrderByCreatedAtAsc(
+                                    ci.getProduct(),
                                     branch,
                                     Status.CYLINDER_LLENO
-                            )
-                            .orElseThrow(() -> new RuntimeException("No Cylinder available"));
+                            ).orElseThrow(() -> new RuntimeException("No Cylinder available"))
+                    );
 
-                    // Cambiar su status a EN_USO
-                    cylinderInventory.setStatus(Status.CYLINDER_EN_USO);
+                    // Si estaba lleno, pasarlo a EN_USO
+                    if (cylinderInventory.getStatus() == Status.CYLINDER_LLENO) {
+                        cylinderInventory.setStatus(Status.CYLINDER_EN_USO);
+                    }
+
+                    // Calcular consumo de bolas
+                    int bolasConsumidas = item.getQuantity() * ci.getProduct().getBallsPerUnit();
+                    double fraccionConsumida = (double) bolasConsumidas / (double) cylinderInventory.getCylinder().getEstimatedBalls();
+                    double nuevaFraccion = cylinderInventory.getFraction() - fraccionConsumida;
+
+                    cylinderInventory.setFraction(Math.max(0, nuevaFraccion));
+                    if (nuevaFraccion <= 0) {
+                        cylinderInventory.setStatus(Status.CYLINDER_VACIO);
+                    }
+
+                    cylinderInventoryRepository.save(cylinderInventory);
                 }
-
-                // Calcular fracción a restar
-                int bolasConsumidas = item.getQuantity() * productInventory.getProduct().getBallsPerUnit();
-                double fraccionConsumida = (double) bolasConsumidas / (double) cylinderInventory.getCylinder().getEstimatedBalls();
-                double nuevaFraccion = cylinderInventory.getFraction() - fraccionConsumida;
-
-                cylinderInventory.setFraction(Math.max(0, nuevaFraccion));
-
-                if (nuevaFraccion <= 0) {
-                    cylinderInventory.setStatus(Status.CYLINDER_VACIO);
-                }
-
-                cylinderInventoryRepository.save(cylinderInventory);
-
-
             }
 
-
+            // Lógica común
+            item.setPrice(price);
+            item.setSale(sale);
+            BigDecimal subTotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
+            total = total.add(subTotal);
         }
 
-        for(SaleItem item : sale.getItems()){
+        for (SaleItem item : sale.getItems()) {
             item.setSale(sale);  // vincula cada item con la venta
         }
 
@@ -175,7 +170,7 @@ public class SaleServiceImp implements SaleService{
             throw new RuntimeException("El pago es insuficiente");
         }
 
-        //calculamos el vuelto en base a lo q pago el cliente
+        // calcular vuelto
         BigDecimal change = payment.subtract(total);
 
         sale.setTotalAmount(total);
@@ -184,14 +179,7 @@ public class SaleServiceImp implements SaleService{
         sale.setPaymentAmount(payment);
         sale.setChangeAmount(change);
 
-        Sale savedSale =  saleRepository.save(sale);
-
-        // llenar productos completos para la respuesta JSON
-        /*for (SaleItem item : savedSale.getItems()) {
-            Product product = productInventoryRepository.findById(item.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-            item.setProduct(product);
-        }*/
+        Sale savedSale = saleRepository.save(sale);
 
         return savedSale;
     }

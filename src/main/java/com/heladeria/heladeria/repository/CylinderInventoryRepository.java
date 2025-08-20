@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CylinderInventoryRepository extends JpaRepository<CylinderInventory, Long> {
+    Optional<CylinderInventory> findByProduct(Product product);
     List<CylinderInventory> findByBranchId(Long branchId);
     Optional<CylinderInventory> findFirstByProductAndBranchAndStatusOrderByCreatedAtAsc(
             Product product,
