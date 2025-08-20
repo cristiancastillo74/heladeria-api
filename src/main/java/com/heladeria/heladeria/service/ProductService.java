@@ -10,5 +10,4 @@ public interface ProductService {
     public Product saveProduct(Product product);
     public Product findProductById(Long id);
     public boolean deleteProduct(Long id);
-    public void disminuirStock(Long id, int cantidad);
 }

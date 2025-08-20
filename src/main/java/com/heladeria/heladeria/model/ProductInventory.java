@@ -15,29 +15,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class CylinderInventory {
-
+public class ProductInventory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "cylinder_id")
-    private Cylinder cylinder;
-
-    @ManyToOne
-    @JoinColumn(name = "branch_id")
-    private Branch branch;  // Sucursal donde se consumió
-
-    private Double fraction;
-
-    @Enumerated(EnumType.STRING)
-    private Status status;
+    private Integer stock;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
 
     @CreatedDate
     private LocalDateTime createdAt;

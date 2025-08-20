@@ -38,16 +38,4 @@ public class ProductServiceImp implements ProductService{
         }
         return false;
     }
-
-    @Override
-    @Transactional
-    public void disminuirStock(Long id, int quantity) {
-        Product product = productRepository
-                .findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
-        if(product.getStock() < quantity){
-            throw new RuntimeException("Stock insufficient");
-        }
-        product.setStock(product.getStock() - quantity);
-        productRepository.save(product);
-    }
 }

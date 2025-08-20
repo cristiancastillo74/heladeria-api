@@ -22,16 +22,12 @@ public class Product {
     private Long id;
 
     private String name;
-    private String category;
     private BigDecimal price;
-    private Integer stock;
     private Boolean isIceCream = false;
     private Integer BallsPerUnit = 0;
 
-    @ManyToOne
-    @JoinColumn(name = "cylinder_id")
-    private Cylinder cylinder;
-
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
     @CreatedDate
     private LocalDateTime createdAt;
