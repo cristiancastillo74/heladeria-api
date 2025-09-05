@@ -34,11 +34,6 @@ public class CylinderInventory {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-
     @CreatedDate
     private LocalDateTime createdAt;
 

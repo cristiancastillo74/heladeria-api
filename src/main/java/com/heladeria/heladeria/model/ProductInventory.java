@@ -22,6 +22,11 @@ public class ProductInventory {
     private Integer stock;
 
     @ManyToOne
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+
+    @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 

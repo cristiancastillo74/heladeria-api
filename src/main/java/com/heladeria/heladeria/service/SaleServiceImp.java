@@ -1,5 +1,6 @@
 package com.heladeria.heladeria.service;
 
+import com.heladeria.heladeria.dto.BallSelection;
 import com.heladeria.heladeria.model.*;
 import com.heladeria.heladeria.repository.*;
 import jakarta.transaction.Transactional;
@@ -81,78 +82,74 @@ public class SaleServiceImp implements SaleService{
 
         BigDecimal total = BigDecimal.ZERO;
 
-        // Validar stock de productos normales antes de procesar
-        for (SaleItem item : sale.getItems()) {
-            Optional<ProductInventory> productInventoryOpt = productInventoryRepository.findById(item.getProduct().getId());
-            if (productInventoryOpt.isPresent()) {
-                ProductInventory productInventory = productInventoryOpt.get();
-                if (!productInventory.getProduct().getIsIceCream()) {
-                    if (productInventory.getStock() < item.getQuantity()) {
-                        throw new RuntimeException("Stock insuficiente para producto: " + productInventory.getProduct().getName());
-                    }
-                }
-            }
-        }
-
         // Procesar items
         for (SaleItem item : sale.getItems()) {
-            Product product = item.getProduct();
-            BigDecimal price;
+            Product product = productRepository.findById(item.getProduct().getId())
+                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-            Optional<ProductInventory> productInventoryOpt = productInventoryRepository.findById(product.getId());
-            if (productInventoryOpt.isPresent()) {
-                // Caso 1: Producto normal
-                ProductInventory pi = productInventoryOpt.get();
-                price = pi.getProduct().getPrice();
+            item.setProduct(product);
 
-                // Actualizar stock
-                if (!pi.getProduct().getIsIceCream()) {
-                    productInventoryService.disminuirStock(product.getId(), item.getQuantity());
+            BigDecimal price = product.getPrice();
+
+            // Caso 1: Producto normal (no es helado)
+            if (!product.getIsIceCream()) {
+                ProductInventory pi = productInventoryRepository.findByProductAndBranch(product, branch)
+                        .orElseThrow(() -> new RuntimeException("No hay inventario para producto: " + product.getName()));
+
+                if (pi.getStock() < item.getQuantity()) {
+                    throw new RuntimeException("Stock insuficiente para producto: " + product.getName());
                 }
 
-            } else {
-                // Caso 2: Cilindro (helado)
-                CylinderInventory ci = cylinderInventoryRepository.findByProduct(product)
-                        .orElseThrow(() -> new RuntimeException("Inventario de cilindro no encontrado para producto " + product.getName()));
-                price = ci.getProduct().getPrice();
+                productInventoryService.disminuirStock(product.getId(), item.getQuantity());
+            }
+            // Caso 2: Producto tipo helado
+            else {
+                // Validar que vengan selecciones de bolas
+                if (item.getBallSelections() == null || item.getBallSelections().isEmpty()) {
+                    throw new RuntimeException("Debe seleccionar cilindros/sabores para el producto: " + product.getName());
+                }
 
-                if (ci.getProduct().getIsIceCream() && ci.getProduct().getBallsPerUnit() > 0) {
-                    Optional<CylinderInventory> optionalCylinder = cylinderInventoryRepository.findFirstByProductAndBranchAndStatusOrderByCreatedAtAsc(
-                            ci.getProduct(),
-                            branch,
-                            Status.CYLINDER_EN_USO
-                    );
+                // Calcular cuántas bolas debería llevar en total
+                int bolasEsperadas = product.getBallsPerUnit() * item.getQuantity();
+                int bolasSeleccionadas = item.getBallSelections().stream()
+                        .mapToInt(BallSelection::getBalls)
+                        .sum();
 
-                    CylinderInventory cylinderInventory = optionalCylinder.orElseGet(() ->
-                            cylinderInventoryRepository.findFirstByProductAndBranchAndStatusOrderByCreatedAtAsc(
-                                    ci.getProduct(),
-                                    branch,
-                                    Status.CYLINDER_LLENO
-                            ).orElseThrow(() -> new RuntimeException("No Cylinder available"))
-                    );
+                if (bolasEsperadas != bolasSeleccionadas) {
+                    throw new RuntimeException("El producto " + product.getName() +
+                            " requiere " + bolasEsperadas + " bolas, pero seleccionó " + bolasSeleccionadas);
+                }
 
-                    // Si estaba lleno, pasarlo a EN_USO
-                    if (cylinderInventory.getStatus() == Status.CYLINDER_LLENO) {
-                        cylinderInventory.setStatus(Status.CYLINDER_EN_USO);
+                // Descontar bolas de cada cilindro
+                for (BallSelection selection : item.getBallSelections()) {
+                    CylinderInventory cylinderInventory = cylinderInventoryRepository.findById(selection.getCylinderId())
+                            .orElseThrow(() -> new RuntimeException("Cilindro no encontrado: " + selection.getCylinderId()));
+
+                    if (!cylinderInventory.getBranch().getId().equals(branch.getId())) {
+                        throw new RuntimeException("El cilindro no pertenece a la sucursal actual");
                     }
 
-                    // Calcular consumo de bolas
-                    int bolasConsumidas = item.getQuantity() * ci.getProduct().getBallsPerUnit();
-                    double fraccionConsumida = (double) bolasConsumidas / (double) cylinderInventory.getCylinder().getEstimatedBalls();
-                    double nuevaFraccion = cylinderInventory.getFraction() - fraccionConsumida;
+                    int bolasConsumidas = selection.getBalls();
+                    double fraccionConsumida = (double) bolasConsumidas /
+                            (double) cylinderInventory.getCylinder().getEstimatedBalls();
 
+                    double nuevaFraccion = cylinderInventory.getFraction() - fraccionConsumida;
                     cylinderInventory.setFraction(Math.max(0, nuevaFraccion));
+
                     if (nuevaFraccion <= 0) {
                         cylinderInventory.setStatus(Status.CYLINDER_VACIO);
+                    } else if (cylinderInventory.getStatus() == Status.CYLINDER_LLENO) {
+                        cylinderInventory.setStatus(Status.CYLINDER_EN_USO);
                     }
 
                     cylinderInventoryRepository.save(cylinderInventory);
                 }
             }
 
-            // Lógica común
+            // Lógica común (precio y subtotal)
             item.setPrice(price);
             item.setSale(sale);
+
             BigDecimal subTotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
             total = total.add(subTotal);
         }
@@ -179,9 +176,7 @@ public class SaleServiceImp implements SaleService{
         sale.setPaymentAmount(payment);
         sale.setChangeAmount(change);
 
-        Sale savedSale = saleRepository.save(sale);
-
-        return savedSale;
+        return saleRepository.save(sale);
     }
 
     @Override

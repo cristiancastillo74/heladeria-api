@@ -42,6 +42,6 @@ public class CylinderInventoryImp implements CylinderInventoryService{
 
     @Override
     public List<CylinderInventory> getByBranch(Long branchId) {
-        return cylinderInventoryRepository.findByBranchId(branchId);
+        return cylinderInventoryRepository.findByBranch_Id(branchId);
     }
 }
