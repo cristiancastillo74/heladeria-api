@@ -26,6 +26,9 @@ public class Product {
     private Boolean isIceCream = false;
     private Integer BallsPerUnit = 0;
 
+    @Column(unique = true, nullable = false)
+    private String code;
+
     @Enumerated(EnumType.STRING)
     private Category category;
 
