@@ -1,15 +1,17 @@
 package com.heladeria.heladeria.service;
 
 import com.heladeria.heladeria.model.CylinderInventory;
+import com.heladeria.heladeria.model.Expense;
 import com.heladeria.heladeria.repository.CylinderInventoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CylinderInventoryImp implements CylinderInventoryService{
+public class CylinderInventoryServiceImp implements CylinderInventoryService{
 
     @Autowired
     private CylinderInventoryRepository cylinderInventoryRepository;
@@ -21,6 +23,19 @@ public class CylinderInventoryImp implements CylinderInventoryService{
 
     @Override
     public CylinderInventory guardarCylinderInventory(CylinderInventory cylinderInventory) {
+        if (cylinderInventory.getId() == null) {
+            // Es nuevo, asignar createdAt y updatedAt
+            cylinderInventory.setCreatedAt(LocalDateTime.now());
+            //cylinderInventory.setUpdatedAt(LocalDateTime.now());
+        } else {
+            // Es update, solo actualizar updatedAt
+            // Para conservar createdAt original, buscar el registro actual
+            CylinderInventory original = cylinderInventoryRepository.findById(cylinderInventory.getId())
+                    .orElseThrow(() -> new RuntimeException("Expense no encontrado"));
+
+            cylinderInventory.setCreatedAt(original.getCreatedAt()); // conservar createdAt
+            cylinderInventory.setUpdatedAt(LocalDateTime.now());
+        }
         return cylinderInventoryRepository.save(cylinderInventory);
     }
 
