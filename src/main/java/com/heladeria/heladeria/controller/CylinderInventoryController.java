@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("helados")
-@CrossOrigin(value = "http://localhost:55555")
+@CrossOrigin(value = "*")
 public class CylinderInventoryController {
 
     @Autowired
@@ -49,7 +49,7 @@ public class CylinderInventoryController {
         return cylinderInventoryService.getByBranch(branchId);
     }
 
-    @PutMapping("/cyInventory/{id}")
+   /* @PutMapping("/cyInventory/{id}")
     public ResponseEntity<CylinderInventory> update(@PathVariable Long id, @RequestBody CylinderInventory cylinderInventory){
         CylinderInventory cylinder = cylinderInventoryService.buscarPorIdCylinderInventory(id);
         if (cylinder != null){
@@ -57,7 +57,7 @@ public class CylinderInventoryController {
             return ResponseEntity.ok(cylinderInventoryService.guardarCylinderInventory(cylinderInventory));
         }
         return ResponseEntity.notFound().build();
-    }
+    }*/
 
 
 }

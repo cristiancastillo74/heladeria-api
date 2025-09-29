@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("helados")
-@CrossOrigin(value = "http://localhost:3001")
+@CrossOrigin(value = "*")
 public class CylinderConsumptionController {
 
     @Autowired
