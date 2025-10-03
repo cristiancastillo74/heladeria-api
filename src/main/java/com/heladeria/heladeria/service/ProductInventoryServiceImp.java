@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +24,14 @@ public class ProductInventoryServiceImp implements ProductInventoryService{
 
     @Override
     public ProductInventory saveProductInventory(ProductInventory productInventory) {
+        if (productInventory.getId() == null) {
+            // Es nuevo, asignar createdAt y updatedAt
+            productInventory.setCreatedAt(LocalDateTime.now());
+            productInventory.setUpdatedAt(LocalDateTime.now());
+        } else {
+            productInventory.setUpdatedAt(LocalDateTime.now());
+        }
+
         return productInventoryRepository.save(productInventory);
     }
 
