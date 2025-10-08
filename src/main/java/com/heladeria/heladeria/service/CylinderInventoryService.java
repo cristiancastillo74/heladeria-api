@@ -10,5 +10,5 @@ public interface CylinderInventoryService {
     public CylinderInventory buscarPorIdCylinderInventory(Long id);
     public boolean eliminarCylinderInventory(Long id);
     public List<CylinderInventory> getByBranch(Long branchId);
-
+    public List<CylinderInventory> obtenerCylinderInventoryDisponiblesCondicional();
 }

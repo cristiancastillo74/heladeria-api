@@ -10,6 +10,9 @@ public interface CylinderInventoryRepository extends JpaRepository<CylinderInven
     Optional<CylinderInventory> findByCylinder(Cylinder cylinder);
     List<CylinderInventory> findByBranch_Id(Long branchId);
 
+    List<CylinderInventory> findByStatusNot(Status status);
+
+
     Optional<CylinderInventory> findFirstByCylinderAndBranchAndStatusOrderByCreatedAtAsc(
             Cylinder cylinder,
             Branch branch,

@@ -21,6 +21,11 @@ public class CylinderInventoryController {
         return cylinderInventoryService.obtenerCylinderInventory();
     }
 
+    @GetMapping("cyInventory/buy")
+    public List<CylinderInventory> listCyInvDisponiblesCondicional(){
+        return cylinderInventoryService.obtenerCylinderInventoryDisponiblesCondicional();
+    }
+
     @GetMapping("/cyInventory/{id}")
     public ResponseEntity<CylinderInventory> obtenerPorIdCylinderInventory(@PathVariable Long id){
         CylinderInventory cylinderInventory = cylinderInventoryService.buscarPorIdCylinderInventory(id);
@@ -49,7 +54,7 @@ public class CylinderInventoryController {
         return cylinderInventoryService.getByBranch(branchId);
     }
 
-   /* @PutMapping("/cyInventory/{id}")
+    @PutMapping("/cyInventory/{id}")
     public ResponseEntity<CylinderInventory> update(@PathVariable Long id, @RequestBody CylinderInventory cylinderInventory){
         CylinderInventory cylinder = cylinderInventoryService.buscarPorIdCylinderInventory(id);
         if (cylinder != null){
@@ -57,7 +62,7 @@ public class CylinderInventoryController {
             return ResponseEntity.ok(cylinderInventoryService.guardarCylinderInventory(cylinderInventory));
         }
         return ResponseEntity.notFound().build();
-    }*/
+    }
 
 
 }
