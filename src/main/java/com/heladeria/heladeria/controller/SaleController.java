@@ -21,8 +21,11 @@ public class SaleController {
 
     @GetMapping("/sale")
     public List<Sale> getSales(){
+        //hola
         return saleService.listarSale();
     }
+
+
 
     @PostMapping("/sale")
     public ResponseEntity<Sale> crearVenta(
