@@ -192,8 +192,14 @@ public class SaleServiceImp implements SaleService{
             item.setPrice(price);
             item.setSale(sale);
 
-            BigDecimal subTotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
-            total = total.add(subTotal);
+            // ⚠️ Verificar si hay que ignorar el precio
+            if (Boolean.TRUE.equals(item.getIgnorePrice())) {
+                // No sumar al total
+                item.setPrice(BigDecimal.ZERO); // ← opcional, para que quede claro en la base
+            } else {
+                BigDecimal subTotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
+                total = total.add(subTotal);
+            }
         }
 
         for (SaleItem item : sale.getItems()) {
