@@ -1,6 +1,8 @@
 package com.heladeria.heladeria.controller;
 
 import com.heladeria.heladeria.model.Expense;
+import com.heladeria.heladeria.model.Status;
+import com.heladeria.heladeria.model.TypeExpense;
 import com.heladeria.heladeria.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,11 @@ public class ExpenseController {
     public ResponseEntity<Expense> obtenerExpenseById(@PathVariable Long id){
         Expense expense = expenseService.obtenerExpensePorId(id);
         return ResponseEntity.ok(expense);
+    }
+
+    @GetMapping("expenses/typeExpenses")
+    public TypeExpense[] getType(){
+        return TypeExpense.values();
     }
 
     @PostMapping("expenses")

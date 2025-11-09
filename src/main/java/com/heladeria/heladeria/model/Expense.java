@@ -24,6 +24,9 @@ public class Expense {
     private String descripcion;
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
+    private TypeExpense typeExpense;
+
     @CreatedDate
     private LocalDateTime createdAt;
 

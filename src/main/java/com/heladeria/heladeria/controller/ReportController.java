@@ -1,10 +1,12 @@
 package com.heladeria.heladeria.controller;
 
+import com.heladeria.heladeria.dto.BalanceReportDTO;
 import com.heladeria.heladeria.dto.CylinderInventoryReportDTO;
 import com.heladeria.heladeria.dto.ProductInventoryReportDTO;
 import com.heladeria.heladeria.dto.SalesReportDTO;
 import com.heladeria.heladeria.repository.CylinderInventoryRepository;
 import com.heladeria.heladeria.repository.SaleItemRepository;
+import com.heladeria.heladeria.service.BalanceReportService;
 import com.heladeria.heladeria.service.ProductInventoryReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,8 @@ public class ReportController {
     private ProductInventoryReportService productInventoryReportServiceImp;
     @Autowired
     private CylinderInventoryRepository cylinderInventoryRepository;
+    @Autowired
+    private BalanceReportService balanceReportService;
 
 
 
@@ -64,6 +68,17 @@ public class ReportController {
     @GetMapping("/inventory/cylinders")
     public List<CylinderInventoryReportDTO> getCylinderInventoryReport() {
         return cylinderInventoryRepository.getCylinderInventoryReport();
+    }
+
+    @GetMapping("/balance")
+    public BalanceReportDTO getBalanceReport(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        return balanceReportService.getBalance(
+                startDate.atStartOfDay(),
+                endDate.plusDays(1).atStartOfDay()
+        );
     }
 
 
