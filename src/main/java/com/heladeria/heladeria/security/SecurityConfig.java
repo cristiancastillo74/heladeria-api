@@ -42,7 +42,9 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         //login
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/me").authenticated()
                         //cylinder
                         .requestMatchers(HttpMethod.GET,    "/helados/cylinder/**").authenticated()
                         .requestMatchers(HttpMethod.POST,   "/helados/cylinder/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")

@@ -48,8 +48,17 @@ public class AuthController {
         }
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-        return ResponseEntity.ok(Map.of("token", token));
+
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "user", Map.of(
+                        "id", user.getIdUser(),
+                        "username", user.getUsername(),
+                        "role", user.getRole().name()
+                )
+        ));
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequestDTO dto) {
