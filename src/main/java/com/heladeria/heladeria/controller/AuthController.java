@@ -49,12 +49,23 @@ public class AuthController {
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
 
+        Map<String, Object> branchData = null;
+        if (user.getBranch() != null) {
+            branchData = Map.of(
+                    "id", user.getBranch().getId(),
+                    "name", user.getBranch().getName()
+            );
+        }
+
         return ResponseEntity.ok(Map.of(
                 "token", token,
                 "user", Map.of(
                         "id", user.getIdUser(),
                         "username", user.getUsername(),
-                        "role", user.getRole().name()
+                        "firstName", user.getFirstName(),
+                        "lastName", user.getLastName(),
+                        "role", user.getRole().name(),
+                        "branch", branchData
                 )
         ));
     }

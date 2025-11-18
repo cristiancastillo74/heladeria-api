@@ -47,24 +47,24 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/me").authenticated()
                         //cylinder
                         .requestMatchers(HttpMethod.GET,    "/helados/cylinder/**").authenticated()
-                        .requestMatchers(HttpMethod.POST,   "/helados/cylinder/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
-                        .requestMatchers(HttpMethod.DELETE, "/helados/cylinder/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.POST,   "/helados/cylinder/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.DELETE, "/helados/cylinder/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
                         //cyInvent
                         .requestMatchers(HttpMethod.GET,    "/helados/cyInventory/**").authenticated()
-                        .requestMatchers(HttpMethod.POST,   "/helados/cyInventory/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.POST,   "/helados/cyInventory/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
                         .requestMatchers(HttpMethod.DELETE, "/helados/cyInventory/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
-                        .requestMatchers(HttpMethod.PUT,    "/helados/cyInventory/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.PUT,    "/helados/cyInventory/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
                         //Expense
                         .requestMatchers(HttpMethod.GET,    "/helados/expenses/**").authenticated()
-                        .requestMatchers(HttpMethod.POST,   "/helados/expenses/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
-                        .requestMatchers(HttpMethod.DELETE, "/helados/expenses/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.POST,   "/helados/expenses/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.DELETE, "/helados/expenses/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
                         //product
                         .requestMatchers(HttpMethod.GET,    "/helados/product/**").authenticated()
-                        .requestMatchers(HttpMethod.POST,   "/helados/product/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
-                        .requestMatchers(HttpMethod.DELETE, "/helados/product/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.POST,   "/helados/product/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.DELETE, "/helados/product/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
                         //productInventory
                         .requestMatchers(HttpMethod.GET,    "/helados/productInventory/**").authenticated()
-                        .requestMatchers(HttpMethod.POST,   "/helados/productInventory/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        //.requestMatchers(HttpMethod.POST,   "/helados/productInventory/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
                         .requestMatchers(HttpMethod.DELETE, "/helados/productInventory/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
                         //api/reports
                         .requestMatchers("/api/reports/**").hasRole("ADMIN_GLOBAL")

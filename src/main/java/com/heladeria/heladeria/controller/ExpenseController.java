@@ -24,23 +24,23 @@ public class ExpenseController {
         return expenses;
     }
 
-    @GetMapping("expenses/{id}")
+    @GetMapping("/expenses/{id}")
     public ResponseEntity<Expense> obtenerExpenseById(@PathVariable Long id){
         Expense expense = expenseService.obtenerExpensePorId(id);
         return ResponseEntity.ok(expense);
     }
 
-    @GetMapping("expenses/typeExpenses")
+    @GetMapping("/expenses/typeExpenses")
     public TypeExpense[] getType(){
         return TypeExpense.values();
     }
 
-    @PostMapping("expenses")
+    @PostMapping("/expenses")
     public Expense guardarExpense(@RequestBody Expense expense){
         return expenseService.guardarExpense(expense);
     }
 
-    @DeleteMapping("expenses/{id}")
+    @DeleteMapping("/expenses/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id){
         boolean eliminado = expenseService.eliminarExpense(id);
         if (eliminado) {
