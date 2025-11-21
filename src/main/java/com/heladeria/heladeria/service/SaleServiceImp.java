@@ -21,8 +21,6 @@ public class SaleServiceImp implements SaleService{
     @Autowired
     private  SaleRepository saleRepository;
     @Autowired
-    private CylinderConsumptionService cylinderConsumptionService;
-    @Autowired
     private ProductInventoryService productInventoryService;
     @Autowired
     private UserRepository userRepository;

@@ -5,7 +5,7 @@ public enum Category {
     BEBIDA,
     CONO,
     SERVILLETA,
-    CREMA_CHANTILLI,
     BANANA,
-    DEPOSITO
+    DEPOSITO,
+    TOPPING
 }
