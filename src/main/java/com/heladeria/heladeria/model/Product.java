@@ -29,8 +29,9 @@ public class Product {
     @Column(unique = true, nullable = false)
     private String code;
 
-    @Enumerated(EnumType.STRING)
-    private Category category;
+    private String category;
+
+    private String status;
 
     @CreatedDate
     private LocalDateTime createdAt;

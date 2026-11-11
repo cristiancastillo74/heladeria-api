@@ -25,7 +25,7 @@ public class ProductInventoryReportServiceImp implements ProductInventoryReportS
                 .filter(pi -> !pi.getProduct().getIsIceCream()) // 🔹 solo productos normales
                 .map(pi -> new ProductInventoryReportDTO(
                         pi.getProduct().getName(),
-                        pi.getProduct().getCategory() != null ? pi.getProduct().getCategory().name() : "Sin categoría",
+                        pi.getProduct().getCategory() != null ? pi.getProduct().getCategory() : "Sin categoría",
                         pi.getStock(),
                         pi.getBranch() != null ? pi.getBranch().getName() : "Sin sucursal"
                 ))

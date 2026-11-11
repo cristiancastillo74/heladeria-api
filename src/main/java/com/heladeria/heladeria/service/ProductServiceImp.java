@@ -2,6 +2,8 @@ package com.heladeria.heladeria.service;
 
 import com.heladeria.heladeria.model.Product;
 import com.heladeria.heladeria.repository.ProductRepository;
+import com.heladeria.heladeria.repository.ProductCategoryRepository;
+import com.heladeria.heladeria.repository.ProductStatusRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,10 @@ public class ProductServiceImp implements ProductService{
 
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    ProductCategoryRepository categoryRepository;
+    @Autowired
+    ProductStatusRepository statusRepository;
     @Override
     public List<Product> getProduct() {
         return productRepository.findAll();
@@ -21,6 +27,13 @@ public class ProductServiceImp implements ProductService{
 
     @Override
     public Product saveProduct(Product product) {
+        if (product.getCategory() == null || !categoryRepository.existsByNameIgnoreCase(product.getCategory())) {
+            throw new IllegalArgumentException("Selecciona una categoría existente");
+        }
+        if (product.getStatus() == null || product.getStatus().isBlank()
+                || !statusRepository.existsByNameIgnoreCase(product.getStatus())) {
+            throw new IllegalArgumentException("Selecciona un estado de producto existente");
+        }
         return productRepository.save(product);
     }
 

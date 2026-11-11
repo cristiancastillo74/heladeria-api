@@ -43,8 +43,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         //login
                         .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/register").hasRole("ADMIN_GLOBAL")
                         .requestMatchers("/api/auth/me").authenticated()
+                        .requestMatchers("/api/users", "/api/users/**", "/api/branches", "/api/branches/**")
+                        .hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN_GLOBAL")
                         //cylinder
                         .requestMatchers(HttpMethod.GET,    "/helados/cylinder/**").authenticated()
                         //.requestMatchers(HttpMethod.POST,   "/helados/cylinder/**").hasAnyRole("ADMIN_GLOBAL", "ADMIN_BRANCH")
@@ -96,7 +99,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5055", "http://rival:5055")); // o "*" temporalmente
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:5055", "http://rival:5055"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

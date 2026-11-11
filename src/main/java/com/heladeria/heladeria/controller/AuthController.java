@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
@@ -57,17 +58,15 @@ public class AuthController {
             );
         }
 
-        return ResponseEntity.ok(Map.of(
-                "token", token,
-                "user", Map.of(
-                        "id", user.getIdUser(),
-                        "username", user.getUsername(),
-                        "firstName", user.getFirstName(),
-                        "lastName", user.getLastName(),
-                        "role", user.getRole().name(),
-                        "branch", branchData
-                )
-        ));
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("id", user.getIdUser());
+        userData.put("username", user.getUsername());
+        userData.put("firstName", user.getFirstName());
+        userData.put("lastName", user.getLastName());
+        userData.put("role", user.getRole().name());
+        userData.put("branch", branchData);
+
+        return ResponseEntity.ok(Map.of("token", token, "user", userData));
     }
 
 
