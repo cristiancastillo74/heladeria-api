@@ -9,6 +9,9 @@ import java.util.List;
 
 public interface SaleRepository extends JpaRepository<Sale,Long> {
 
+    List<Sale> findByBranch_IdOrderByCreatedAtDesc(Long branchId);
+    List<Sale> findByUser_IdUserOrderByCreatedAtDesc(Long userId);
+
     List<Sale> findByBranchIdAndCreatedAtBetween(
             Long branchId,
             LocalDateTime start,

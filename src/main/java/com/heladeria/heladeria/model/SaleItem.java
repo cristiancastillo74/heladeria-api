@@ -29,7 +29,6 @@ public class SaleItem {
     @Transient
     private List<BallSelection> ballSelections = new ArrayList<>();
 
-    @Transient // ← Esto es clave si no quieres que se guarde en la base de datos
     private Boolean ignorePrice;
 
     @ManyToOne

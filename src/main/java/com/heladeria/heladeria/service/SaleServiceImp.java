@@ -60,6 +60,16 @@ public class SaleServiceImp implements SaleService{
     }
 
     @Override
+    public List<Sale> listarVentasPorSucursal(Long branchId) {
+        return saleRepository.findByBranch_IdOrderByCreatedAtDesc(branchId);
+    }
+
+    @Override
+    public List<Sale> listarVentasPorUsuario(Long userId) {
+        return saleRepository.findByUser_IdUserOrderByCreatedAtDesc(userId);
+    }
+
+    @Override
     public Sale buscarSalePorId(Long idSale) {
         return saleRepository.findById(idSale).orElse(null);
     }
@@ -79,6 +89,66 @@ public class SaleServiceImp implements SaleService{
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional
+    public Sale corregirVenta(Long saleId, Sale replacement) {
+        Sale original = saleRepository.findById(saleId)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Long userId = original.getUser().getIdUser();
+        Long branchId = original.getBranch().getId();
+        restaurarInventario(original);
+        saleRepository.delete(original);
+        saleRepository.flush();
+        return crearVenta(replacement, userId, branchId);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarVentaRestaurandoInventario(Long saleId) {
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        restaurarInventario(sale);
+        saleRepository.delete(sale);
+    }
+
+    private void restaurarInventario(Sale sale) {
+        for (SaleItem item : sale.getItems()) {
+            Product product = item.getProduct();
+            if (product == null) continue;
+            if (Boolean.TRUE.equals(product.getIsIceCream())) {
+                for (SaleFlavorSelection selection : item.getFlavorSelections()) {
+                    Long consumedInventoryId = selection.getCylinderInventoryId();
+                    if (consumedInventoryId != null) {
+                        cylinderInventoryRepository.findById(consumedInventoryId)
+                                .ifPresent(inventory -> restoreCylinderInventory(inventory, selection.getBalls()));
+                    } else {
+                        cylinderInventoryRepository.findAllByCylinderAndBranchOrderByCreatedAtAsc(
+                                selection.getCylinder(), sale.getBranch()).stream()
+                            .filter(inventory -> inventory.getFraction() == null || inventory.getFraction() < 1.0)
+                            .findFirst()
+                            .ifPresent(inventory -> restoreCylinderInventory(inventory, selection.getBalls()));
+                    }
+                }
+            } else {
+                productInventoryRepository.findByProductAndBranch(product, sale.getBranch())
+                        .ifPresent(inventory -> {
+                            inventory.setStock(inventory.getStock() + item.getQuantity());
+                            productInventoryRepository.save(inventory);
+                        });
+            }
+        }
+    }
+
+    private void restoreCylinderInventory(CylinderInventory inventory, Integer balls) {
+        double estimatedBalls = inventory.getCylinder().getEstimatedBalls();
+        if (estimatedBalls <= 0) return;
+        double restored = inventory.getFraction() + (balls / estimatedBalls);
+        inventory.setFraction(Math.min(1.0, restored));
+        inventory.setStatus(restored >= 1.0 ? Status.CYLINDER_LLENO
+                : restored > 0 ? Status.CYLINDER_EN_USO : Status.CYLINDER_VACIO);
+        cylinderInventoryRepository.save(inventory);
     }
 
     @Override
@@ -154,6 +224,7 @@ public class SaleServiceImp implements SaleService{
                     SaleFlavorSelection flavorSelection = new SaleFlavorSelection();
                     flavorSelection.setSaleItem(item);
                     flavorSelection.setCylinder(cylinderInventory.getCylinder());
+                    flavorSelection.setCylinderInventoryId(cylinderInventory.getId());
                     flavorSelection.setBalls(selection.getBalls());
                     item.getFlavorSelections().add(flavorSelection);
 

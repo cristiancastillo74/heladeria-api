@@ -29,5 +29,7 @@ public class SaleFlavorSelection {
     @JoinColumn(name = "cylinder_id", nullable = false)
     private Cylinder cylinder;
 
+    private Long cylinderInventoryId;
+
     private Integer balls;
 }

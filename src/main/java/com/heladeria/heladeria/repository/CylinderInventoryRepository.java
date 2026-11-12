@@ -11,6 +11,8 @@ import java.util.Optional;
 
 public interface CylinderInventoryRepository extends JpaRepository<CylinderInventory, Long> {
     Optional<CylinderInventory> findByCylinder(Cylinder cylinder);
+    Optional<CylinderInventory> findByCylinderAndBranch(Cylinder cylinder, Branch branch);
+    List<CylinderInventory> findAllByCylinderAndBranchOrderByCreatedAtAsc(Cylinder cylinder, Branch branch);
     List<CylinderInventory> findByBranch_Id(Long branchId);
 
     List<CylinderInventory> findByStatusNot(Status status);
