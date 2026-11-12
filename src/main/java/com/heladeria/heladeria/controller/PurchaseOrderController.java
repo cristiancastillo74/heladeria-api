@@ -87,7 +87,7 @@ public class PurchaseOrderController {
                     .map(product -> new PurchaseOrderCandidateDTO(
                             product.getId(), product.getName(),
                             stockByProduct.getOrDefault(product.getId(), 0).doubleValue(),
-                            "unidades", product.getPrice()))
+                            "unidades", product.getPurchasePrice()))
                     .sorted(Comparator.comparing(PurchaseOrderCandidateDTO::currentStock)
                             .thenComparing(PurchaseOrderCandidateDTO::name, String.CASE_INSENSITIVE_ORDER))
                     .toList();
@@ -103,7 +103,7 @@ public class PurchaseOrderController {
                 .map(cylinder -> new PurchaseOrderCandidateDTO(
                         cylinder.getId(), cylinder.getFlavor(),
                         stockByCylinder.getOrDefault(cylinder.getId(), 0.0),
-                        "cilindros equivalentes", null))
+                        "cilindros equivalentes", cylinder.getPurchasePrice()))
                 .sorted(Comparator.comparing(PurchaseOrderCandidateDTO::currentStock)
                         .thenComparing(PurchaseOrderCandidateDTO::name, String.CASE_INSENSITIVE_ORDER))
                 .toList();

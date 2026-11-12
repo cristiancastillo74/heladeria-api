@@ -23,6 +23,7 @@ public class Product {
 
     private String name;
     private BigDecimal price;
+    private BigDecimal purchasePrice;
     private Boolean isIceCream = false;
     private Integer BallsPerUnit = 0;
 

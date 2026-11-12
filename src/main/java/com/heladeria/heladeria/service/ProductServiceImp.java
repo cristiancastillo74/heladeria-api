@@ -27,6 +27,9 @@ public class ProductServiceImp implements ProductService{
 
     @Override
     public Product saveProduct(Product product) {
+        if (product.getPurchasePrice() == null || product.getPurchasePrice().signum() < 0) {
+            throw new IllegalArgumentException("El precio de compra es obligatorio y no puede ser negativo");
+        }
         if (product.getCategory() == null || !categoryRepository.existsByNameIgnoreCase(product.getCategory())) {
             throw new IllegalArgumentException("Selecciona una categoría existente");
         }

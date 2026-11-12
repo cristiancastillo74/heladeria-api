@@ -9,6 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -24,6 +25,8 @@ public class Cylinder {
     private String flavor;  // Sabor del cilindro
 
     private Double estimatedBalls;  // Estimación de bolas restantes
+
+    private BigDecimal purchasePrice;
 
     private Double lowFractionThreshold = 0.2;
 
