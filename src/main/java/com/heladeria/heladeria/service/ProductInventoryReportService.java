@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface ProductInventoryReportService {
 
-    public List<ProductInventoryReportDTO> getCurrentInventoryReport();
+    public List<ProductInventoryReportDTO> getCurrentInventoryReport(Long branchId);
 
 }

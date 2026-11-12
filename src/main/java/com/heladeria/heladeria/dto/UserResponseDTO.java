@@ -14,5 +14,6 @@ public record UserResponseDTO(
         String username,
         String role,
         Long branchId,
-        String branchName
+        String branchName,
+        boolean canViewInventory
 ) {}

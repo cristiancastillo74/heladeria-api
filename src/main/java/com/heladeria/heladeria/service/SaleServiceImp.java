@@ -146,6 +146,17 @@ public class SaleServiceImp implements SaleService{
                     CylinderInventory cylinderInventory = cylinderInventoryRepository.findById(selection.getCylinderId())
                             .orElseThrow(() -> new RuntimeException("Cilindro no encontrado: " + selection.getCylinderId()));
 
+                    if (cylinderInventory.getBranch() == null
+                            || !cylinderInventory.getBranch().getId().equals(branch.getId())) {
+                        throw new RuntimeException("El cilindro seleccionado no pertenece a la sucursal de la venta");
+                    }
+
+                    SaleFlavorSelection flavorSelection = new SaleFlavorSelection();
+                    flavorSelection.setSaleItem(item);
+                    flavorSelection.setCylinder(cylinderInventory.getCylinder());
+                    flavorSelection.setBalls(selection.getBalls());
+                    item.getFlavorSelections().add(flavorSelection);
+
                     int bolasConsumidas = selection.getBalls();
                     double fraccionConsumida = (double) bolasConsumidas /
                             (double) cylinderInventory.getCylinder().getEstimatedBalls();

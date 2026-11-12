@@ -4,6 +4,7 @@ import com.heladeria.heladeria.dto.CylinderInventoryReportDTO;
 import com.heladeria.heladeria.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,8 @@ public interface CylinderInventoryRepository extends JpaRepository<CylinderInven
         JOIN ci.cylinder c
         JOIN ci.branch b
         where ci.status <> com.heladeria.heladeria.model.Status.CYLINDER_VACIO
+        and (:branchId is null or b.id = :branchId)
         ORDER BY b.name, c.flavor
     """)
-    List<CylinderInventoryReportDTO> getCylinderInventoryReport();
+    List<CylinderInventoryReportDTO> getCylinderInventoryReport(@Param("branchId") Long branchId);
 }

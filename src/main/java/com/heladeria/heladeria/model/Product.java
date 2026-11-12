@@ -33,6 +33,8 @@ public class Product {
 
     private String status;
 
+    private Integer lowStockThreshold = 0;
+
     @CreatedDate
     private LocalDateTime createdAt;
 

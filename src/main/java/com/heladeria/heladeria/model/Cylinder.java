@@ -25,6 +25,8 @@ public class Cylinder {
 
     private Double estimatedBalls;  // Estimación de bolas restantes
 
+    private Double lowFractionThreshold = 0.2;
+
     @CreatedDate
     private LocalDateTime createdAt;
 

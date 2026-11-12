@@ -1,6 +1,7 @@
 package com.heladeria.heladeria.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.heladeria.heladeria.dto.BallSelection;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -39,4 +40,8 @@ public class SaleItem {
     @JoinColumn(name = "sale_id")
     @JsonBackReference
     private Sale sale;
+
+    @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<SaleFlavorSelection> flavorSelections = new ArrayList<>();
 }

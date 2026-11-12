@@ -14,5 +14,6 @@ public record UserManagementRequestDTO(
         @NotBlank String username,
         String password,
         @NotBlank String role,
-        Long branchId
+        Long branchId,
+        Boolean canViewInventory
 ) {}

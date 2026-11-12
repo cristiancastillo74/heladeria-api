@@ -30,9 +30,15 @@ public class CylinderInventoryServiceImp implements CylinderInventoryService{
         return cylinderInventoryRepository.findByStatusNot(Status.CYLINDER_VACIO);
     }
 
-    public List<CylinderInventory> obtenerCylinderInventoryDisponiblesCondicional() {
+    public List<CylinderInventory> obtenerCylinderInventoryDisponiblesCondicional(Long branchId) {
         // 1. Traer todos menos los vacíos
         List<CylinderInventory> todos = cylinderInventoryRepository.findByStatusNot(Status.CYLINDER_VACIO);
+        if (branchId != null) {
+            todos = todos.stream()
+                    .filter(inventory -> inventory.getBranch() != null
+                            && branchId.equals(inventory.getBranch().getId()))
+                    .toList();
+        }
 
         // 2. Agrupar por sabor
         Map<String, List<CylinderInventory>> agrupadoPorSabor = todos.stream()

@@ -65,6 +65,7 @@ public class AuthController {
         userData.put("lastName", user.getLastName());
         userData.put("role", user.getRole().name());
         userData.put("branch", branchData);
+        userData.put("canViewInventory", user.isCanViewInventory());
 
         return ResponseEntity.ok(Map.of("token", token, "user", userData));
     }

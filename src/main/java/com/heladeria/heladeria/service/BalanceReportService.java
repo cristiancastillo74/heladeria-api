@@ -5,5 +5,5 @@ import com.heladeria.heladeria.dto.BalanceReportDTO;
 import java.time.LocalDateTime;
 
 public interface BalanceReportService {
-    public BalanceReportDTO getBalance(LocalDateTime startDate, LocalDateTime endDate);
+    public BalanceReportDTO getBalance(LocalDateTime startDate, LocalDateTime endDate, Long branchId);
 }

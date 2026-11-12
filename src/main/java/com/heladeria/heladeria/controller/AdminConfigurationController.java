@@ -4,6 +4,11 @@ import com.heladeria.heladeria.dto.BranchRequestDTO;
 import com.heladeria.heladeria.dto.CatalogOptionDTO;
 import com.heladeria.heladeria.dto.CatalogValueRequestDTO;
 import com.heladeria.heladeria.dto.CylinderTypeRequestDTO;
+import com.heladeria.heladeria.dto.InventoryThresholdDTO;
+import com.heladeria.heladeria.dto.ThresholdUpdateDTO;
+import com.heladeria.heladeria.model.Cylinder;
+import com.heladeria.heladeria.model.Product;
+import com.heladeria.heladeria.repository.CylinderRepository;
 import com.heladeria.heladeria.model.Branch;
 import com.heladeria.heladeria.model.CylinderType;
 import com.heladeria.heladeria.model.ProductCategory;
@@ -37,18 +42,21 @@ public class AdminConfigurationController {
     private final ProductStatusRepository statusRepository;
     private final CylinderTypeRepository cylinderTypeRepository;
     private final ProductRepository productRepository;
+    private final CylinderRepository cylinderRepository;
 
     public AdminConfigurationController(
             BranchRepository branchRepository,
             ProductCategoryRepository categoryRepository,
             ProductStatusRepository statusRepository,
             CylinderTypeRepository cylinderTypeRepository,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            CylinderRepository cylinderRepository) {
         this.branchRepository = branchRepository;
         this.categoryRepository = categoryRepository;
         this.statusRepository = statusRepository;
         this.cylinderTypeRepository = cylinderTypeRepository;
         this.productRepository = productRepository;
+        this.cylinderRepository = cylinderRepository;
     }
 
     @GetMapping("/branches")
@@ -191,6 +199,50 @@ public class AdminConfigurationController {
         CylinderType value = cylinderTypeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tipo de cilindro no encontrado"));
         cylinderTypeRepository.delete(value);
+    }
+
+    @GetMapping("/inventory-thresholds/products")
+    public List<InventoryThresholdDTO> productThresholds() {
+        return productRepository.findAllByOrderByNameAsc().stream()
+                .map(product -> new InventoryThresholdDTO(product.getId(), product.getName(),
+                        product.getLowStockThreshold() == null ? 0 : product.getLowStockThreshold(), "unidades"))
+                .toList();
+    }
+
+    @PutMapping("/inventory-thresholds/products/{id}")
+    public InventoryThresholdDTO updateProductThreshold(
+            @PathVariable Long id, @Valid @RequestBody ThresholdUpdateDTO request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
+        double threshold = request.threshold().doubleValue();
+        if (threshold < 0 || threshold != Math.floor(threshold)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El mínimo de stock debe ser un entero no negativo");
+        }
+        product.setLowStockThreshold((int) threshold);
+        productRepository.save(product);
+        return new InventoryThresholdDTO(product.getId(), product.getName(), product.getLowStockThreshold(), "unidades");
+    }
+
+    @GetMapping("/inventory-thresholds/cylinders")
+    public List<InventoryThresholdDTO> cylinderThresholds() {
+        return cylinderRepository.findAllByOrderByFlavorAsc().stream()
+                .map(cylinder -> new InventoryThresholdDTO(cylinder.getId(), cylinder.getFlavor(),
+                (cylinder.getLowFractionThreshold() == null ? 0.2 : cylinder.getLowFractionThreshold()) * 100, "%"))
+                .toList();
+    }
+
+    @PutMapping("/inventory-thresholds/cylinders/{id}")
+    public InventoryThresholdDTO updateCylinderThreshold(
+            @PathVariable Long id, @Valid @RequestBody ThresholdUpdateDTO request) {
+        Cylinder cylinder = cylinderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sabor de cilindro no encontrado"));
+        double threshold = request.threshold().doubleValue();
+        if (threshold < 0 || threshold > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El porcentaje debe estar entre 0 y 100");
+        }
+        cylinder.setLowFractionThreshold(threshold / 100.0);
+        cylinderRepository.save(cylinder);
+        return new InventoryThresholdDTO(cylinder.getId(), cylinder.getFlavor(), request.threshold(), "%");
     }
 
     private void ensureBranchNameAvailable(String name, Long ignoredId) {

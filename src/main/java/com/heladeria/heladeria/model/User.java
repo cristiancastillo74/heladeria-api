@@ -37,6 +37,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private boolean canViewInventory = false;
+
     @ManyToOne
     @JoinColumn(name = "branch_id")
     private Branch branch;

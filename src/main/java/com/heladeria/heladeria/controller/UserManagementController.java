@@ -67,10 +67,13 @@ public class UserManagementController {
         if (userRepository.existsByUsername(request.username())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya existe");
         }
+        if (!isGlobalAdmin(actor) && Boolean.TRUE.equals(request.canViewInventory())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo ADMIN_GLOBAL puede habilitar acceso de lectura de inventarios");
+        }
 
         Role role = parseRole(request.role());
         User user = new User();
-        applyRequest(user, request, role, resolveBranch(actor, role, request.branchId()));
+        applyRequest(user, request, role, resolveBranch(actor, role, request.branchId()), actor, true);
         user.setPassword(passwordEncoder.encode(request.password()));
         return toResponse(userRepository.save(user));
     }
@@ -96,7 +99,11 @@ public class UserManagementController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "No puedes cambiar tu propio rol");
         }
         ensureAssignableRole(actor, role);
-        applyRequest(user, request, role, resolveBranch(actor, role, request.branchId()));
+        if (!isGlobalAdmin(actor) && Boolean.TRUE.equals(request.canViewInventory())
+            && !user.isCanViewInventory()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo ADMIN_GLOBAL puede habilitar acceso de lectura de inventarios");
+        }
+        applyRequest(user, request, role, resolveBranch(actor, role, request.branchId()), actor, false);
         if (request.password() != null && !request.password().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.password()));
         }
@@ -176,7 +183,8 @@ public class UserManagementController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sucursal no encontrada"));
     }
 
-    private void applyRequest(User user, UserManagementRequestDTO request, Role role, Branch branch) {
+    private void applyRequest(User user, UserManagementRequestDTO request, Role role, Branch branch,
+                              User actor, boolean creating) {
         user.setFirstName(request.firstName().trim());
         user.setLastName(request.lastName().trim());
         user.setDui(request.dui());
@@ -187,6 +195,13 @@ public class UserManagementController {
         user.setUsername(request.username().trim());
         user.setRole(role);
         user.setBranch(branch);
+        if (role != Role.EMPLOYEE) {
+            user.setCanViewInventory(false);
+        } else if (isGlobalAdmin(actor)) {
+            user.setCanViewInventory(Boolean.TRUE.equals(request.canViewInventory()));
+        } else if (creating) {
+            user.setCanViewInventory(false);
+        }
     }
 
     private UserResponseDTO toResponse(User user) {
@@ -195,6 +210,7 @@ public class UserManagementController {
                 user.getPhone(), user.getAddress(), user.getSalary(), user.getWorkDays(),
                 user.getUsername(), user.getRole().name(),
                 user.getBranch() == null ? null : user.getBranch().getId(),
-                user.getBranch() == null ? null : user.getBranch().getName());
+                user.getBranch() == null ? null : user.getBranch().getName(),
+                user.isCanViewInventory());
     }
 }

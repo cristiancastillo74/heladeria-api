@@ -18,8 +18,10 @@ public class ProductInventoryReportServiceImp implements ProductInventoryReportS
     /**
      * Retorna el inventario actual de todos los productos que NO son helados.
      */
-    public List<ProductInventoryReportDTO> getCurrentInventoryReport() {
-        List<ProductInventory> allInventories = productInventoryRepository.findAll();
+    public List<ProductInventoryReportDTO> getCurrentInventoryReport(Long branchId) {
+        List<ProductInventory> allInventories = branchId == null
+                ? productInventoryRepository.findAll()
+                : productInventoryRepository.findByBranch_Id(branchId);
 
         return allInventories.stream()
                 .filter(pi -> !pi.getProduct().getIsIceCream()) // 🔹 solo productos normales

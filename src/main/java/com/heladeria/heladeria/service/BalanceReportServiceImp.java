@@ -18,11 +18,11 @@ public class BalanceReportServiceImp implements BalanceReportService{
     @Autowired
     private ExpenseRepository expenseRepository;
 
-    public BalanceReportDTO getBalance(LocalDateTime startDate, LocalDateTime endDate) {
-        BigDecimal totalSales       = saleItemRepository.getTotalSalesAmount(startDate, endDate);
-        BigDecimal totalExpenses    = expenseRepository.getTotalExpenses(startDate, endDate);
-        BigDecimal fixedExpenses    = expenseRepository.getTotalExpensesByTypeExpense(TypeExpense.GASTO_FIJO, startDate, endDate);
-        BigDecimal variableExpenses = expenseRepository.getTotalExpensesByTypeExpense(TypeExpense.GASTO_VARIABLE, startDate, endDate);
+    public BalanceReportDTO getBalance(LocalDateTime startDate, LocalDateTime endDate, Long branchId) {
+        BigDecimal totalSales       = saleItemRepository.getTotalSalesAmount(startDate, endDate, branchId);
+        BigDecimal totalExpenses    = expenseRepository.getTotalExpenses(startDate, endDate, branchId);
+        BigDecimal fixedExpenses    = expenseRepository.getTotalExpensesByTypeExpense(TypeExpense.GASTO_FIJO, startDate, endDate, branchId);
+        BigDecimal variableExpenses = expenseRepository.getTotalExpensesByTypeExpense(TypeExpense.GASTO_VARIABLE, startDate, endDate, branchId);
 
         if (totalSales       == null) totalSales        = BigDecimal.ZERO;
         if (totalExpenses    == null) totalExpenses     = BigDecimal.ZERO;
